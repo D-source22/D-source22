@@ -1,0 +1,17 @@
+name: Run Seeding Script
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  run-seeding:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Run Seeding script
+      run: ./seeding
