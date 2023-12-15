@@ -1,0 +1,405 @@
+import random
+
+# Set a seed for reproducibility
+  # You can use any integer as the seed
+
+# Rest of your code...
+data = """1 Everton 48
+2 Liverpool 45
+3 West Brom 33
+4 Tottenham 33
+5 Aston V 32
+6 Leicester 32
+7 London Reds 29
+8 Fulham 28
+9 Leeds 25
+10 Southampton 24
+11 Brighton 24
+12 Sheffield U 23
+13 West Ham 21
+14 London Blues 21
+15 Manchester Reds 21
+16 Manchester Blue 21
+17 Palace 20
+18 Wolves 17
+19 Newcastle 17
+20 Burnley 15
+"""
+
+# Split the data into lines
+lines = data.split('\n')
+
+# Convert each line into a dictionary
+teams_data = []
+for line in lines:
+    parts = line.split()
+
+    # Check if there are enough parts to extract rank, team, and points
+    if len(parts) >= 3:
+        rank = int(parts[0])
+        team = ' '.join(parts[1:-1]) if len(parts) > 3 else parts[1]  # Join team name parts
+        points = int(parts[-1])
+        team_data = {"rank": rank, "team": team, "points": points}
+        teams_data.append(team_data)
+    else:
+        print(f"Skipping line: {line}. Insufficient data.")
+
+# Display the resulting list of dictionaries
+for data in teams_data:
+    print(data)
+
+# Function to process match data
+def process_matches_data(matches_data_str):
+    # Split the data into blocks representing each match
+    matches_data_blocks = matches_data_str.strip().split('\n\n\n')
+    print("Matches Data Blocks:", matches_data_blocks)
+
+    # Convert each match block into a dictionary
+    matches_data = []
+
+    for match_block in matches_data_blocks:
+        match_dict = {
+            "team": None,
+            "opponent": None,
+            "odds_1": None,
+            "odds_X": None,
+            "odds_2": None,
+        }
+
+        # Print the match_block content for debugging
+        print(f"Debug: match_block = {match_block}")
+
+        # Split the block into lines, removing leading and trailing whitespaces
+        match_lines = match_block.strip().split('\n')
+
+        if len(match_lines) >= 11:
+            match_dict["team"] = match_lines[0].strip()
+            match_dict["opponent"] = match_lines[1].strip()
+
+            # Process odds
+            match_dict["odds_1"] = float(match_lines[4]) if match_lines[4].strip() else 0
+            match_dict["odds_X"] = float(match_lines[7]) if match_lines[7].strip() else 0
+            match_dict["odds_2"] = float(match_lines[10]) if match_lines[10].strip() else 0
+
+            matches_data.append(match_dict)
+        else:
+            print(f"Error processing match block. Skipping. Invalid format.")
+
+    return matches_data
+
+# Simulation function
+def simulate_match_outcome(home_odds, draw_odds, away_odds, home_points, away_points):
+    home_win_probability = home_odds / (home_odds + draw_odds + away_odds)
+    draw_probability = draw_odds / (home_odds + draw_odds + away_odds)
+    away_win_probability = away_odds / (home_odds + draw_odds + away_odds)
+
+    random_number = random.random()
+
+    if random_number < home_win_probability:
+        return "Home Team Wins"
+    elif random_number < home_win_probability + draw_probability:
+        return "Draw"
+    else:
+        return "Away Team Wins"
+
+# Input Matches Data String
+matches_data_str = """
+
+Manchester Reds
+Tottenham
+
+1
+2.17
+
+X
+3.20
+
+2
+3.45
+
+
+
+
+"""
+# Call the function to get matches_data
+matches_data = process_matches_data(matches_data_str)
+
+# Print formatted match data
+print("\nFormatted Match Data:")
+for match in matches_data:
+    print(match)
+
+print("\nSimulated Match Outcome:")
+
+# Display predictions
+print("\nMatch Predictions:")
+for match in matches_data:
+    home_team = match["team"]
+    away_team = match["opponent"]
+    odds_1 = match.get("odds_1", 0)
+    odds_X = match.get("odds_X", 0)
+    odds_2 = match.get("odds_2", 0)
+
+    home_team_data = next((team for team in teams_data if home_team.lower() in team["team"].lower()), None)
+    print(f"Debug: home_team = {home_team}, home_team_data = {home_team_data}")
+    home_points = home_team_data["points"] if home_team_data else 0
+
+    away_team_data = next((team for team in teams_data if away_team.lower() in team["team"].lower()), None)
+    print(f"Debug: away_team = {away_team}, away_team_data = {away_team_data}")
+    away_points = away_team_data["points"] if away_team_data else 0
+    
+    outcome = simulate_match_outcome(odds_1, odds_X, odds_2, home_points, away_points)
+
+    print(f"\nMatch: {home_team} vs {away_team}")
+    print(f"Odds (Home Win): {odds_1}")
+    print(f"Odds (Draw): {odds_X}")
+    print(f"Odds (Away Win): {odds_2}")
+    print(f"Prediction: {outcome}\n")
+    
+     #Set the actual results based on your real-world outcomes
+actual_results = ["AwayTeam Wins"]  # Replace with actual results
+
+# Initial seed
+# Initial seed
+# Initial seed
+# Initial seed
+seed_to_test = 0
+
+# Load the last saved seed value from a text file
+try:
+    with open("seed_checkpoint.txt", "r") as checkpoint_file:
+        content = checkpoint_file.read().strip()
+        if content:
+            seed_to_test = int(content)
+        else:
+            print("Warning: Empty content in seed_checkpoint.txt. Starting from the beginning.")
+except FileNotFoundError:
+    # File not found, start from the beginning
+    seed_to_test = 0
+
+while True:
+    # Set the seed
+    random.seed(seed_to_test)
+    
+    # Print current seed for tracking progress
+    print(f"Testing seed: {seed_to_test}")
+
+    # Run simulation
+    simulated_results = []
+    for match in matches_data:
+        # Your existing simulation logic
+        outcome = simulate_match_outcome(match["odds_1"], match["odds_X"], match["odds_2"], home_points, away_points)
+        simulated_results.append(outcome)
+
+    # Compare simulated and actual results
+    if simulated_results == actual_results:
+        print(f"Found a suitable seed: {seed_to_test}")
+        break
+    else:
+        seed_to_test += 1
+
+    # Save the current seed value to a text file
+    with open("seed_checkpoint.txt", "w") as checkpoint_file:
+        checkpoint_file.write(str(seed_to_test))import random
+
+# Set a seed for reproducibility
+  # You can use any integer as the seed
+
+# Rest of your code...
+data = """1 Everton 48
+2 Liverpool 45
+3 West Brom 33
+4 Tottenham 33
+5 Aston V 32
+6 Leicester 32
+7 London Reds 29
+8 Fulham 28
+9 Leeds 25
+10 Southampton 24
+11 Brighton 24
+12 Sheffield U 23
+13 West Ham 21
+14 London Blues 21
+15 Manchester Reds 21
+16 Manchester Blue 21
+17 Palace 20
+18 Wolves 17
+19 Newcastle 17
+20 Burnley 15
+"""
+
+# Split the data into lines
+lines = data.split('\n')
+
+# Convert each line into a dictionary
+teams_data = []
+for line in lines:
+    parts = line.split()
+
+    # Check if there are enough parts to extract rank, team, and points
+    if len(parts) >= 3:
+        rank = int(parts[0])
+        team = ' '.join(parts[1:-1]) if len(parts) > 3 else parts[1]  # Join team name parts
+        points = int(parts[-1])
+        team_data = {"rank": rank, "team": team, "points": points}
+        teams_data.append(team_data)
+    else:
+        print(f"Skipping line: {line}. Insufficient data.")
+
+# Display the resulting list of dictionaries
+for data in teams_data:
+    print(data)
+
+# Function to process match data
+def process_matches_data(matches_data_str):
+    # Split the data into blocks representing each match
+    matches_data_blocks = matches_data_str.strip().split('\n\n\n')
+    print("Matches Data Blocks:", matches_data_blocks)
+
+    # Convert each match block into a dictionary
+    matches_data = []
+
+    for match_block in matches_data_blocks:
+        match_dict = {
+            "team": None,
+            "opponent": None,
+            "odds_1": None,
+            "odds_X": None,
+            "odds_2": None,
+        }
+
+        # Print the match_block content for debugging
+        print(f"Debug: match_block = {match_block}")
+
+        # Split the block into lines, removing leading and trailing whitespaces
+        match_lines = match_block.strip().split('\n')
+
+        if len(match_lines) >= 11:
+            match_dict["team"] = match_lines[0].strip()
+            match_dict["opponent"] = match_lines[1].strip()
+
+            # Process odds
+            match_dict["odds_1"] = float(match_lines[4]) if match_lines[4].strip() else 0
+            match_dict["odds_X"] = float(match_lines[7]) if match_lines[7].strip() else 0
+            match_dict["odds_2"] = float(match_lines[10]) if match_lines[10].strip() else 0
+
+            matches_data.append(match_dict)
+        else:
+            print(f"Error processing match block. Skipping. Invalid format.")
+
+    return matches_data
+
+# Simulation function
+def simulate_match_outcome(home_odds, draw_odds, away_odds, home_points, away_points):
+    home_win_probability = home_odds / (home_odds + draw_odds + away_odds)
+    draw_probability = draw_odds / (home_odds + draw_odds + away_odds)
+    away_win_probability = away_odds / (home_odds + draw_odds + away_odds)
+
+    random_number = random.random()
+
+    if random_number < home_win_probability:
+        return "Home Team Wins"
+    elif random_number < home_win_probability + draw_probability:
+        return "Draw"
+    else:
+        return "Away Team Wins"
+
+# Input Matches Data String
+matches_data_str = """
+
+Manchester Reds
+Tottenham
+
+1
+2.17
+
+X
+3.20
+
+2
+3.45
+
+
+
+
+"""
+# Call the function to get matches_data
+matches_data = process_matches_data(matches_data_str)
+
+# Print formatted match data
+print("\nFormatted Match Data:")
+for match in matches_data:
+    print(match)
+
+print("\nSimulated Match Outcome:")
+
+# Display predictions
+print("\nMatch Predictions:")
+for match in matches_data:
+    home_team = match["team"]
+    away_team = match["opponent"]
+    odds_1 = match.get("odds_1", 0)
+    odds_X = match.get("odds_X", 0)
+    odds_2 = match.get("odds_2", 0)
+
+    home_team_data = next((team for team in teams_data if home_team.lower() in team["team"].lower()), None)
+    print(f"Debug: home_team = {home_team}, home_team_data = {home_team_data}")
+    home_points = home_team_data["points"] if home_team_data else 0
+
+    away_team_data = next((team for team in teams_data if away_team.lower() in team["team"].lower()), None)
+    print(f"Debug: away_team = {away_team}, away_team_data = {away_team_data}")
+    away_points = away_team_data["points"] if away_team_data else 0
+    
+    outcome = simulate_match_outcome(odds_1, odds_X, odds_2, home_points, away_points)
+
+    print(f"\nMatch: {home_team} vs {away_team}")
+    print(f"Odds (Home Win): {odds_1}")
+    print(f"Odds (Draw): {odds_X}")
+    print(f"Odds (Away Win): {odds_2}")
+    print(f"Prediction: {outcome}\n")
+    
+     #Set the actual results based on your real-world outcomes
+actual_results = ["AwayTeam Wins"]  # Replace with actual results
+
+# Initial seed
+# Initial seed
+# Initial seed
+# Initial seed
+seed_to_test = 0
+
+# Load the last saved seed value from a text file
+try:
+    with open("seed_checkpoint.txt", "r") as checkpoint_file:
+        content = checkpoint_file.read().strip()
+        if content:
+            seed_to_test = int(content)
+        else:
+            print("Warning: Empty content in seed_checkpoint.txt. Starting from the beginning.")
+except FileNotFoundError:
+    # File not found, start from the beginning
+    seed_to_test = 0
+
+while True:
+    # Set the seed
+    random.seed(seed_to_test)
+    
+    # Print current seed for tracking progress
+    print(f"Testing seed: {seed_to_test}")
+
+    # Run simulation
+    simulated_results = []
+    for match in matches_data:
+        # Your existing simulation logic
+        outcome = simulate_match_outcome(match["odds_1"], match["odds_X"], match["odds_2"], home_points, away_points)
+        simulated_results.append(outcome)
+
+    # Compare simulated and actual results
+    if simulated_results == actual_results:
+        print(f"Found a suitable seed: {seed_to_test}")
+        break
+    else:
+        seed_to_test += 1
+
+    # Save the current seed value to a text file
+    with open("seed_checkpoint.txt", "w") as checkpoint_file:
+        checkpoint_file.write(str(seed_to_test))
